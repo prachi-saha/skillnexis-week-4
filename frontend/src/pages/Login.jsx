@@ -23,6 +23,7 @@ function Login() {
             const response = await API.post("/auth/login", formData);
 
             localStorage.setItem("token", response.data.token);
+            localStorage.setItem("userId", response.data.user.id);
 
             setMessage("Login successful!");
         } catch (error) {
