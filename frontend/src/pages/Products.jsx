@@ -5,6 +5,8 @@ function Products() {
     const [products, setProducts] = useState([]);
     const [message, setMessage] = useState("");
 
+    const userId = localStorage.getItem("userId");
+
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -17,6 +19,24 @@ function Products() {
 
         fetchProducts();
     }, []);
+
+    const addToCart = async (productId) => {
+        if (!userId) {
+            setMessage("Please login before adding products.");
+            return;
+        }
+
+        try {
+            await API.post(`/cart/${userId}`, {
+                productId: productId,
+                quantity: 1
+            });
+
+            setMessage("Product added to cart successfully!");
+        } catch (error) {
+            setMessage("Unable to add product to cart.");
+        }
+    };
 
     return (
         <div className="products-container">
@@ -31,6 +51,10 @@ function Products() {
                         <p>{product.description}</p>
                         <p>Price: ₹{product.price}</p>
                         <p>Stock: {product.stock}</p>
+
+                        <button onClick={() => addToCart(product._id)}>
+                            Add to Cart
+                        </button>
                     </div>
                 ))}
             </div>
