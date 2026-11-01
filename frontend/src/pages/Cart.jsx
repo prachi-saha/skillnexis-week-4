@@ -7,23 +7,33 @@ function Cart() {
 
     const userId = localStorage.getItem("userId");
 
+    const fetchCart = async () => {
+        if (!userId) {
+            setMessage("Please login to view your cart.");
+            return;
+        }
+
+        try {
+            const response = await API.get(`/cart/${userId}`);
+            setCart(response.data.items || []);
+        } catch (error) {
+            setMessage("Unable to load cart.");
+        }
+    };
+
     useEffect(() => {
-        const fetchCart = async () => {
-            if (!userId) {
-                setMessage("Please login to view your cart.");
-                return;
-            }
-
-            try {
-                const response = await API.get(`/cart/${userId}`);
-                setCart(response.data.items || []);
-            } catch (error) {
-                setMessage("Unable to load cart.");
-            }
-        };
-
         fetchCart();
-    }, [userId]);
+    }, []);
+
+    const removeFromCart = async (productId) => {
+        try {
+            await API.delete(`/cart/${userId}/${productId}`);
+            setMessage("Product removed from cart.");
+            fetchCart();
+        } catch (error) {
+            setMessage("Unable to remove product.");
+        }
+    };
 
     return (
         <div className="cart-container">
@@ -39,6 +49,12 @@ function Cart() {
                         <h3>{item.product.name}</h3>
                         <p>Price: ₹{item.product.price}</p>
                         <p>Quantity: {item.quantity}</p>
+
+                        <button
+                            onClick={() => removeFromCart(item.product._id)}
+                        >
+                            Remove
+                        </button>
                     </div>
                 ))
             )}
