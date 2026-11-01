@@ -5,19 +5,12 @@ function Cart() {
     const [cart, setCart] = useState([]);
     const [message, setMessage] = useState("");
 
-    const userId = localStorage.getItem("userId");
-
     const fetchCart = async () => {
-        if (!userId) {
-            setMessage("Please login to view your cart.");
-            return;
-        }
-
         try {
-            const response = await API.get(`/cart/${userId}`);
+            const response = await API.get("/cart");
             setCart(response.data.items || []);
         } catch (error) {
-            setMessage("Unable to load cart.");
+            setMessage("Please login to view your cart.");
         }
     };
 
@@ -27,7 +20,7 @@ function Cart() {
 
     const removeFromCart = async (productId) => {
         try {
-            await API.delete(`/cart/${userId}/${productId}`);
+            await API.delete(`/cart/${productId}`);
             setMessage("Product removed from cart.");
             fetchCart();
         } catch (error) {
