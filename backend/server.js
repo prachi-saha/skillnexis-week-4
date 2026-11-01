@@ -1,7 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-
+if (!process.env.JWT_SECRET) {
+    console.log("JWT_SECRET is missing from environment variables!");
+    process.exit(1);
+}
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/auth");
