@@ -1,5 +1,6 @@
 const express = require("express");
 const Cart = require("../models/Cart");
+const Product = require("../models/Product");
 const authMiddleware = require("../middleware/auth");
 
 const router = express.Router();
@@ -24,6 +25,21 @@ router.get("/", authMiddleware, async (req, res) => {
 router.post("/", authMiddleware, async (req, res) => {
     try {
         const { productId, quantity } = req.body;
+        const amount = Number(quantity || 1);
+
+        if (!productId || !Number.isInteger(amount) || amount < 1) {
+            return res.status(400).json({
+                message: "Invalid product or quantity"
+            });
+        }
+
+        const product = await Product.findById(productId);
+
+        if (!product) {
+            return res.status(404).json({
+                message: "Product not found"
+            });
+        }
 
         let cart = await Cart.findOne({
             user: req.user.id
@@ -40,19 +56,29 @@ router.post("/", authMiddleware, async (req, res) => {
             item => item.product.toString() === productId
         );
 
+        const newQuantity = item
+            ? item.quantity + amount
+            : amount;
+
+        if (newQuantity > product.stock) {
+            return res.status(400).json({
+                message: "Not enough stock available"
+            });
+        }
+
         if (item) {
-            item.quantity += Number(quantity || 1);
+            item.quantity = newQuantity;
         } else {
             cart.items.push({
                 product: productId,
-                quantity: Number(quantity || 1)
+                quantity: amount
             });
         }
 
         await cart.save();
 
         res.json({
-            message: "Product added to cart",
+            message: "Product added to cart successfully",
             cart
         });
 
