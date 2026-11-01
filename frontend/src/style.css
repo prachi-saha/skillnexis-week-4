@@ -5,7 +5,7 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: Helvetica, sans-serif;
     background-color: #f4f6fb;
     color: #202b3c;
 }
@@ -96,4 +96,31 @@ button:hover {
     margin: 15px auto;
     max-width: 400px;
     border-radius: 8px;
+}
+@media (max-width: 600px) {
+    .navbar {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .navbar a {
+        margin: 5px;
+        display: inline-block;
+    }
+
+    .signup-container,
+    .login-container {
+        width: 90%;
+        margin: 40px auto;
+    }
+
+    .product-card {
+        width: 90%;
+    }
+
+    .products-container,
+    .cart-container {
+        padding: 15px;
+    }
 }
