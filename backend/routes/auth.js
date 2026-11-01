@@ -1,10 +1,11 @@
-
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const router = express.Router();
+
+// User Signup
 router.post("/signup", async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -15,7 +16,25 @@ router.post("/signup", async (req, res) => {
             });
         }
 
-        const existingUser = await User.findOne({ email });
+        const cleanEmail = email.trim().toLowerCase();
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailPattern.test(cleanEmail)) {
+            return res.status(400).json({
+                message: "Please enter a valid email"
+            });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({
+                message: "Password must contain at least 6 characters"
+            });
+        }
+
+        const existingUser = await User.findOne({
+            email: cleanEmail
+        });
 
         if (existingUser) {
             return res.status(400).json({
@@ -26,8 +45,8 @@ router.post("/signup", async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await User.create({
-            name,
-            email,
+            name: name.trim(),
+            email: cleanEmail,
             password: hashedPassword
         });
 
@@ -43,11 +62,23 @@ router.post("/signup", async (req, res) => {
         });
     }
 });
+
+// User Login
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+        if (!email || !password) {
+            return res.status(400).json({
+                message: "Please enter email and password"
+            });
+        }
+
+        const cleanEmail = email.trim().toLowerCase();
+
+        const user = await User.findOne({
+            email: cleanEmail
+        });
 
         if (!user) {
             return res.status(400).json({
